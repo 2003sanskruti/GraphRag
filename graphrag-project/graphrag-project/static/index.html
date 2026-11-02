@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7fb">
+  <title>GraphRAG Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{color-scheme:light;--ink:#17201f;--muted:#78817e;--line:#e7eae7;--paper:#fff;--canvas:#f6f7f4;--green:#b7f36b;--green-dark:#214732;--purple:#ddd5ff;--shadow:0 12px 40px rgba(30,46,38,.06);font-family:'DM Sans',sans-serif}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--canvas);color:var(--ink);min-height:100vh}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    .shell{max-width:1320px;margin:auto;padding:28px 42px 52px}
+    .topbar{height:58px;display:flex;align-items:center;justify-content:space-between;margin-bottom:36px}
+    .brand{display:flex;align-items:center;gap:12px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-.7px}
+    .brand-mark{width:37px;height:37px;display:grid;place-items:center;border-radius:13px;background:var(--ink);color:var(--green)}
+    .brand-mark svg{width:23px;height:23px}
+    .top-actions{display:flex;align-items:center;gap:14px}
+    .connection{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:8px 12px;background:#fff;color:#5d6863;font-size:12px;font-weight:600}
+    .status-dot{height:8px;width:8px;border-radius:50%;background:#c8ceca}.status-dot.online{background:#60c98b;box-shadow:0 0 0 3px #e9f8ef}
+    .avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--purple);font-size:14px}
+    .hero{position:relative;overflow:hidden;padding:40px 44px;border-radius:28px;background:#172b25;color:#fff;box-shadow:var(--shadow)}
+    .hero:after{content:"";position:absolute;width:380px;height:380px;right:5%;top:-230px;border-radius:50%;background:radial-gradient(circle,#b7f36b 0,rgba(183,243,107,.1) 42%,transparent 70%);pointer-events:none}
+    .hero-content{position:relative;z-index:1;max-width:690px}
+    .eyebrow{display:flex;align-items:center;gap:9px;color:#c3d6c9;text-transform:uppercase;letter-spacing:1.6px;font-size:10px;font-weight:700}
+    .eyebrow-line{width:23px;height:1px;background:var(--green)}
+    h1,h2,h3,p{margin-top:0}
+    h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(35px,5vw,58px);letter-spacing:-2.7px;line-height:1.04;margin:18px 0 13px}
+    .hero p{margin:0;color:#c1ceca;font-size:15px;line-height:1.7;max-width:540px}
+    .hero .highlight{color:var(--green)}
+    .hero-orbit{position:absolute;right:8%;top:50%;transform:translateY(-42%);width:190px;height:190px;border:1px solid rgba(207,227,211,.23);border-radius:50%;display:grid;place-items:center}
+    .hero-orbit:before,.hero-orbit:after{content:"";position:absolute;border:1px solid rgba(207,227,211,.16);border-radius:50%}.hero-orbit:before{inset:23px}.hero-orbit:after{inset:48px}
+    .orbit-core{z-index:1;width:54px;height:54px;display:grid;place-items:center;border-radius:19px;background:var(--green);color:#163324;box-shadow:0 0 48px rgba(183,243,107,.27)}.orbit-core svg{width:28px;height:28px}
+    .orbit-node{position:absolute;width:11px;height:11px;border:2px solid #172b25;border-radius:50%;background:#b7f36b;z-index:2}.orbit-node.one{top:26px;left:45px}.orbit-node.two{right:13px;top:82px;background:#d6caff}.orbit-node.three{bottom:22px;left:68px;background:#fff}
+    .section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:34px 0 15px}
+    .section-heading h2{font-family:'Space Grotesk',sans-serif;font-size:20px;letter-spacing:-.5px;margin:0 0 4px}
+    .section-heading p{color:var(--muted);font-size:13px;margin:0}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .stat-card{display:flex;align-items:center;gap:14px;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:0 4px 18px rgba(30,46,38,.025)}
+    .stat-icon{height:42px;width:42px;border-radius:14px;display:grid;place-items:center;flex:none}.stat-icon svg{width:20px;height:20px}.stat-icon.green{background:#eef9e5;color:#417a3a}.stat-icon.lilac{background:#f0edff;color:#7560bd}.stat-icon.peach{background:#fff1e7;color:#c47748}
+    .stat-value{font-family:'Space Grotesk',sans-serif;font-size:23px;font-weight:700;letter-spacing:-.6px}.stat-label{font-size:11px;color:var(--muted);margin-top:1px}
+    .workspace{display:grid;grid-template-columns:minmax(320px,.82fr) minmax(0,1.35fr);gap:18px;align-items:start;margin-top:18px}
+    .panel{background:var(--paper);border:1px solid var(--line);border-radius:21px;padding:23px;box-shadow:0 5px 22px rgba(30,46,38,.035)}
+    .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:19px}
+    .panel-kicker{font-size:10px;letter-spacing:1.3px;text-transform:uppercase;font-weight:700;color:#929b96;margin-bottom:7px}
+    .panel h2{font-family:'Space Grotesk',sans-serif;font-size:19px;letter-spacing:-.5px;margin:0}
+    .step{color:#87918c;font-size:12px;font-weight:600}
+    .dropzone{min-height:177px;padding:22px;border:1.5px dashed #d6ddd7;border-radius:17px;background:#fafbf9;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:.18s ease;cursor:pointer}
+    .dropzone:hover,.dropzone.dragover{border-color:#83bd68;background:#f6fbed}
+    .upload-symbol{height:47px;width:47px;border-radius:16px;background:#eef8e7;color:#4e8d45;display:grid;place-items:center;margin-bottom:12px}.upload-symbol svg{width:23px;height:23px}
+    .drop-title{font-size:13px;font-weight:700}.drop-hint{margin-top:5px;color:var(--muted);font-size:11px}.file-name{margin-top:8px;color:#44813f;font-size:12px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+    .options{display:flex;align-items:flex-start;gap:10px;margin:17px 0 19px;color:#58635e;font-size:12px;line-height:1.5}
+    .options input{accent-color:#55964e;margin:2px 0 0;width:15px;height:15px}
+    .options small{display:block;color:#929b96;font-size:10px;margin-top:2px}
+    .primary{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:0;border-radius:12px;padding:12px 17px;background:var(--ink);color:#fff;font-size:12px;font-weight:700;transition:transform .16s,background .16s;min-height:43px}
+    .primary:hover{background:#2c483b;transform:translateY(-1px)}.primary:disabled{opacity:.55;cursor:not-allowed;transform:none}.primary svg{height:16px;width:16px}
+    .upload-status{font-size:11px;line-height:1.5;margin:12px 0 0;min-height:16px;color:#68736e}.upload-status.success{color:#398354}.upload-status.error{color:#bd4a3e}
+    .doc-section{border-top:1px solid #eff1ee;margin-top:20px;padding-top:17px}
+    .doc-title{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:10px}.doc-count{font-size:10px;color:#88928c;font-weight:600}
+    .doc-list{display:flex;flex-direction:column;gap:8px}.empty-docs{padding:18px 10px;text-align:center;border-radius:13px;background:#fafbf9;color:#929b96;font-size:11px;line-height:1.6}
+    .doc-row{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #eff1ee;border-radius:13px;min-width:0}.doc-file-icon{width:33px;height:36px;border-radius:10px;background:#f3f1ff;color:#7867b4;display:grid;place-items:center;flex:none}.doc-file-icon svg{width:17px;height:17px}.doc-info{min-width:0;flex:1}.doc-name{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.doc-meta{font-size:10px;color:#89928d;margin-top:3px}.delete-btn{border:0;background:transparent;color:#a2aaa5;padding:7px;border-radius:8px;display:grid;place-items:center}.delete-btn:hover{color:#c75047;background:#fff1ef}.delete-btn svg{width:15px;height:15px}
+    .ask-panel{min-height:500px;display:flex;flex-direction:column}
+    .context-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:#f0f8e9;color:#507e43;font-size:10px;font-weight:700;white-space:nowrap}.context-pill svg{height:13px;width:13px}
+    .chat-area{flex:1;min-height:250px;padding:20px 2px 12px}
+    .welcome{height:100%;min-height:230px;display:flex;align-items:center;justify-content:center;text-align:center;flex-direction:column;padding:22px}.welcome-mark{height:53px;width:53px;border-radius:18px;display:grid;place-items:center;background:#f0edff;color:#7160b0;margin-bottom:14px}.welcome-mark svg{width:25px;height:25px}.welcome h3{font-family:'Space Grotesk',sans-serif;font-size:16px;letter-spacing:-.3px;margin:0 0 7px}.welcome p{max-width:320px;color:#89928d;font-size:12px;line-height:1.65;margin:0}
+    .answer-card{border:1px solid #e8ebe6;border-radius:16px;padding:18px;background:#fcfdfb;animation:fade-in .25s ease}.answer-label{display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:1px;font-size:9px;font-weight:700;color:#758078;margin-bottom:12px}.answer-label span{height:7px;width:7px;background:#69bd79;border-radius:50%}.answer-text{font-size:13px;line-height:1.8;white-space:pre-wrap;color:#27342d}.answer-subsections{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:13px}.subsection{padding:13px;border:1px solid #ecefeb;border-radius:13px;background:#fff;min-width:0}.subsection h3{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#7e8981;margin:0 0 9px}.subsection ul{margin:0;padding-left:15px;color:#535f57;font-size:10px;line-height:1.7}.subsection li+li{margin-top:4px}.subsection.empty{color:#9aa39d;font-size:10px;line-height:1.5}
+    .thinking{display:flex;align-items:center;gap:10px;color:#727d75;font-size:12px;padding:14px}.spinner{width:18px;height:18px;border:2px solid #e3e9e1;border-top-color:#6eaa56;border-radius:50%;animation:spin .7s linear infinite}
+    .suggestions{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}.suggestion{background:#fff;border:1px solid #e7eae6;color:#67726b;padding:8px 10px;border-radius:999px;font-size:10px;transition:.15s}.suggestion:hover{border-color:#a6d78e;color:#3e7142;background:#f8fcf4}
+    .composer{border:1px solid #e0e5df;background:#fff;border-radius:16px;padding:7px 8px 7px 15px;display:flex;align-items:center;gap:10px;box-shadow:0 3px 12px rgba(35,50,40,.035)}.composer:focus-within{border-color:#9cc783;box-shadow:0 0 0 3px rgba(156,199,131,.16)}
+    .composer input{border:0;outline:0;min-width:0;flex:1;padding:9px 0;color:var(--ink);font-size:12px;background:transparent}.composer input::placeholder{color:#a1a9a4}.send-btn{width:39px;height:39px;display:grid;place-items:center;border:0;border-radius:12px;background:var(--green);color:#183422;transition:.16s}.send-btn:hover{background:#a5e45a;transform:translateY(-1px)}.send-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}.send-btn svg{width:17px;height:17px}
+    .footer-note{text-align:center;color:#9aa29d;font-size:10px;margin-top:13px}
+    .toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);padding:11px 16px;border-radius:12px;background:#20372a;color:#fff;font-size:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.2s;z-index:5;max-width:calc(100vw - 32px)}.toast.show{opacity:1;transform:translate(-50%,0)}
+    @keyframes spin{to{transform:rotate(360deg)}}@keyframes fade-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:900px){.shell{padding:22px 24px 40px}.hero-orbit{right:5%;opacity:.7}.workspace{grid-template-columns:minmax(270px,.9fr) minmax(0,1.2fr)}}
+    @media(max-width:700px){.shell{padding:15px 15px 32px}.topbar{margin-bottom:20px}.hero{padding:30px 25px;border-radius:22px}.hero-orbit{width:130px;height:130px;right:-5%;opacity:.3}.hero-orbit:before{inset:17px}.hero-orbit:after{inset:34px}.orbit-core{width:42px;height:42px}.hero p{font-size:13px;max-width:90%}.stats{gap:9px}.stat-card{padding:13px 10px;gap:8px;border-radius:15px;align-items:flex-start;flex-direction:column}.stat-icon{width:34px;height:34px;border-radius:11px}.stat-icon svg{width:17px;height:17px}.stat-value{font-size:19px}.stat-label{font-size:9px}.workspace{grid-template-columns:1fr}.ask-panel{min-height:440px}.answer-subsections{grid-template-columns:1fr 1fr}.section-heading{margin-top:26px}}
+    @media(max-width:420px){.connection{font-size:0;padding:9px}.connection .status-dot{margin:0}.brand{font-size:16px}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.stat-card{padding:11px 9px}.stat-label{line-height:1.3}.panel{padding:18px}.panel-head{margin-bottom:15px}.context-pill{font-size:0}.context-pill svg{width:15px;height:15px}.answer-subsections{grid-template-columns:1fr}.hero{padding:27px 20px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="5" cy="6" r="2" stroke="currentColor" stroke-width="1.7"/><circle cx="18.5" cy="5" r="2" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="18.5" r="2" stroke="currentColor" stroke-width="1.7"/><circle cx="19" cy="16" r="1.5" stroke="currentColor" stroke-width="1.7"/><path d="m7 6 9.5-.7M6 7.7l5 8.8m2.8.8 3.8-.9m-4.1-1 4-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>GraphRAG <span style="font-weight:500;color:#89938d">/ studio</span></div>
+      <div class="top-actions"><div class="connection" title="API connection status"><span class="status-dot" id="statusDot"></span><span id="statusText">Connecting</span></div><div class="avatar" title="Knowledge workspace">✳</div></div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-content"><div class="eyebrow"><span class="eyebrow-line"></span> YOUR KNOWLEDGE, CONNECTED</div><h1>Answers live<br>between the <span class="highlight">lines.</span></h1><p>Bring your documents together. Explore the ideas and connections hiding inside them with graph-powered search.</p></div>
+      <div class="hero-orbit" aria-hidden="true"><span class="orbit-node one"></span><span class="orbit-node two"></span><span class="orbit-node three"></span><div class="orbit-core"><svg viewBox="0 0 24 24" fill="none"><path d="M5 6.5 12 3l7 3.5v8L12 21l-7-6.5v-8Z" stroke="currentColor" stroke-width="1.6"/><path d="m5.5 6.8 6.5 3.4 6.5-3.4M12 10.2V20m-7-8 7 3.5 7-3.5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></div></div>
+    </section>
+
+    <section aria-label="Workspace overview">
+      <div class="section-heading"><div><h2>Your workspace</h2><p>A living index of your documents and ideas.</p></div></div>
+      <div class="stats">
+        <article class="stat-card"><div class="stat-icon green"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3.8h8l4 4V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.8a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/><path d="M14 4v5h5M8 13h8m-8 3.5h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><div class="stat-value" id="docStat">—</div><div class="stat-label">Documents indexed</div></div></article>
+        <article class="stat-card"><div class="stat-icon lilac"><svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="7" r="2.3" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="6" r="2.3" stroke="currentColor" stroke-width="1.6"/><circle cx="13" cy="18" r="2.3" stroke="currentColor" stroke-width="1.6"/><path d="m8.2 6.7 7.5-.5M7 9l4.8 7m5.2-7.8-3 7.6" stroke="currentColor" stroke-width="1.6"/></svg></div><div><div class="stat-value" id="chunkStat">—</div><div class="stat-label">Searchable chunks</div></div></article>
+        <article class="stat-card"><div class="stat-icon peach"><svg viewBox="0 0 24 24" fill="none"><path d="m12 3 2.2 5.1L20 10l-5.8 1.9L12 17l-2.2-5.1L4 10l5.8-1.9L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></div><div><div class="stat-value" id="entityStat">—</div><div class="stat-label">Graph entities</div></div></article>
+      </div>
+    </section>
+
+    <section class="workspace" aria-label="Document and question workspace">
+      <article class="panel">
+        <div class="panel-head"><div><div class="panel-kicker">01 / Add to your library</div><h2>Upload documents</h2></div><span class="step">PDF · DOCX · TXT · MD</span></div>
+        <input type="file" id="file" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown">
+        <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Choose a document or drop one here"><div class="upload-symbol"><svg viewBox="0 0 24 24" fill="none"><path d="M12 15V4m0 0L8 8m4-4 4 4M5 14v4.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="drop-title">Drop a file here or <span style="color:#4d8c46">browse</span></div><div class="drop-hint">Up to 50 MB · your files stay in your workspace</div><div class="file-name" id="fileName" hidden></div></div>
+        <label class="options"><input type="checkbox" id="graph" checked><span>Build the knowledge graph<small>Extract connected people, topics, and ideas with Groq</small></span></label>
+        <button class="primary" id="uploadBtn" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M12 15V4m0 0L8 8m4-4 4 4M5 14v4.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Upload &amp; index</span></button>
+        <div class="upload-status" id="upmsg" role="status" aria-live="polite"></div>
+        <div class="doc-section"><div class="doc-title"><span>Your library</span><span class="doc-count" id="docCount">Loading…</span></div><div class="doc-list" id="docs"><div class="empty-docs">Loading your documents…</div></div></div>
+      </article>
+
+      <article class="panel ask-panel">
+        <div class="panel-head"><div><div class="panel-kicker">02 / Find the connection</div><h2>Ask your knowledge base</h2></div><span class="context-pill"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4.5 7v5c0 4.3 3.2 7.2 7.5 9 4.3-1.8 7.5-4.7 7.5-9V7L12 3Z" stroke="currentColor" stroke-width="1.6"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> GROQ POWERED</span></div>
+        <div class="chat-area" id="ans" aria-live="polite"><div class="welcome"><div class="welcome-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1m-8.6 8.6-2.1 2.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/></svg></div><h3>Your next insight starts here</h3><p>Ask a question across your documents. Get a clear answer grounded in sources and connected ideas.</p></div></div>
+        <div class="suggestions"><button class="suggestion" type="button" data-question="What are the main themes in my documents?">Summarize key themes</button><button class="suggestion" type="button" data-question="Which people or organizations are most connected?">Find connected people</button><button class="suggestion" type="button" data-question="What should I know across these documents?">Find useful connections</button></div>
+        <form class="composer" id="askForm"><input id="q" type="text" autocomplete="off" placeholder="Ask anything about your documents…" aria-label="Question"><button class="send-btn" id="askBtn" type="submit" aria-label="Ask question"><svg viewBox="0 0 24 24" fill="none"><path d="M21 3 10.8 13.2M21 3l-6.5 18-3.7-7.8L3 9.5 21 3Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></form>
+        <div class="footer-note">Answers include citations so you can verify the source.</div>
+      </article>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    let toastTimer;
+    function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800)}
+    async function readResponse(response){const data=await response.json().catch(()=>({detail:'The server returned an unexpected response.'}));if(!response.ok)throw new Error(data.detail||`Request failed (${response.status})`);return data}
+    function setConnection(ok){$('statusDot').classList.toggle('online',ok);$('statusText').textContent=ok?'Workspace online':'Connection issue'}
+    async function loadDocs(){
+      try{
+        const docs=await readResponse(await fetch('/documents'));
+        $('docs').innerHTML=docs.length?docs.map(d=>`<div class="doc-row"><div class="doc-file-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3.8h8l4 4V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.8a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/><path d="M14 4v5h5M8 13h8m-8 3.5h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="doc-info"><div class="doc-name" title="${esc(d.name)}">${esc(d.name)}</div><div class="doc-meta">${Number(d.chunks)||0} searchable chunks</div></div><button class="delete-btn" type="button" data-delete="${esc(d.id)}" aria-label="Delete ${esc(d.name)}" title="Delete document"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16m-10 4v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>`).join(''):'<div class="empty-docs">No documents yet.<br>Add your first file to start building your knowledge base.</div>';
+        $('docCount').textContent=`${docs.length} ${docs.length===1?'document':'documents'}`;$('docStat').textContent=docs.length;
+        let chunkTotal=docs.reduce((sum,d)=>sum+(Number(d.chunks)||0),0);$('chunkStat').textContent=chunkTotal.toLocaleString();
+        setConnection(true);
+        try{const stats=await readResponse(await fetch('/stats'));$('entityStat').textContent=(Number(stats.Entity)||0).toLocaleString()}catch{$('entityStat').textContent='—'}
+      }catch(error){setConnection(false);$('docs').innerHTML='<div class="empty-docs">Could not load documents. Check that the app and Neo4j are running.</div>';$('docCount').textContent='Unavailable';$('docStat').textContent='—';$('chunkStat').textContent='—';$('entityStat').textContent='—'}
+    }
+    $('dropzone').addEventListener('click',()=>$('file').click());
+    $('dropzone').addEventListener('keydown',(event)=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();$('file').click()}});
+    $('file').addEventListener('change',()=>{const file=$('file').files[0];$('fileName').hidden=!file;$('fileName').textContent=file?file.name:''});
+    for(const eventName of ['dragenter','dragover'])$('dropzone').addEventListener(eventName,(event)=>{event.preventDefault();$('dropzone').classList.add('dragover')});
+    for(const eventName of ['dragleave','drop'])$('dropzone').addEventListener(eventName,(event)=>{event.preventDefault();$('dropzone').classList.remove('dragover')});
+    $('dropzone').addEventListener('drop',(event)=>{const file=event.dataTransfer.files[0];if(file){$('file').files=event.dataTransfer.files;$('file').dispatchEvent(new Event('change'))}});
+    $('uploadBtn').addEventListener('click',async()=>{
+      const file=$('file').files[0];const status=$('upmsg');
+      if(!file){status.textContent='Choose a document first.';status.className='upload-status error';return}
+      if(file.size>50*1024*1024){status.textContent='This file is larger than 50 MB.';status.className='upload-status error';return}
+      const button=$('uploadBtn');button.disabled=true;button.querySelector('span').textContent='Indexing…';status.className='upload-status';status.textContent='Preparing chunks and searching for connected ideas…';
+      const form=new FormData();form.append('file',file);
+      try{const result=await readResponse(await fetch(`/upload?build_graph=${$('graph').checked}`,{method:'POST',body:form}));status.className='upload-status success';status.textContent=`Indexed ${result.chunks} chunks · ${result.entities} entities · ${result.relations} relations`;toast('Document added to your library');$('file').value='';$('fileName').hidden=true;$('fileName').textContent='';await loadDocs()}
+      catch(error){status.className='upload-status error';status.textContent=error.message;toast('Could not index document')}
+      finally{button.disabled=false;button.querySelector('span').textContent='Upload & index'}
+    });
+    $('docs').addEventListener('click',async(event)=>{const button=event.target.closest('[data-delete]');if(!button)return;if(!confirm('Delete this document and its chunks?'))return;button.disabled=true;try{await readResponse(await fetch(`/documents/${encodeURIComponent(button.dataset.delete)}`,{method:'DELETE'}));toast('Document deleted');await loadDocs()}catch(error){toast(error.message);button.disabled=false}});
+    $('askForm').addEventListener('submit',async(event)=>{
+      event.preventDefault();const question=$('q').value.trim();if(!question)return;
+      const button=$('askBtn');button.disabled=true;$('ans').innerHTML='<div class="thinking"><span class="spinner"></span>Searching passages and connecting ideas…</div>';
+      try{
+        const result=await readResponse(await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question})}));
+        const facts=(result.facts||[]).slice(0,8),sources=result.sources||[];
+        const factBlock=facts.length?`<div class="subsection"><h3>Connected facts</h3><ul>${facts.map(f=>`<li>${esc(f)}</li>`).join('')}</ul></div>`:'<div class="subsection empty">No graph facts found for this question yet.</div>';
+        const sourceBlock=sources.length?`<div class="subsection"><h3>Sources · ${sources.length}</h3><ul>${sources.map(s=>`<li>[${esc(s.n)}] ${esc(s.doc||'Document')}${s.page?`, p. ${esc(s.page)}`:''} <span style="color:#9aa39d">· ${esc(s.via||'vector')}</span></li>`).join('')}</ul></div>`:'<div class="subsection empty">No matching passages returned.</div>';
+        $('ans').innerHTML=`<div class="answer-card"><div class="answer-label"><span></span> GROUNDED ANSWER</div><div class="answer-text">${esc(result.answer||'No answer returned.')}</div><div class="answer-subsections">${factBlock}${sourceBlock}</div></div>`;
+      }catch(error){$('ans').innerHTML=`<div class="answer-card"><div class="answer-label" style="color:#bd4a3e"><span style="background:#d85c50"></span> REQUEST FAILED</div><div class="answer-text">${esc(error.message)}</div><p style="font-size:11px;color:#8a938d;margin:12px 0 0">Check the server terminal and your Groq/Neo4j configuration, then try again.</p></div>`}
+      finally{button.disabled=false}
+    });
+    document.querySelectorAll('[data-question]').forEach(button=>button.addEventListener('click',()=>{$('q').value=button.dataset.question;$('q').focus()}));
+    loadDocs();
+  </script>
+</body>
+</html>
